@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理系统</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/totoro.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" type="text/css">
+    {% endblock %}
+</head>
+
+<body>
+    {% for message in get_flashed_messages() %}
+        <div class="alert">{{ message }}</div>
+    {% endfor %}
+
+    {% block content %}{% endblock %}
+
+    <footer>
+        <small>&copy; 2025 <a href="https://jh666.pythonanywhere.com">HelloFlask</a></small>
+    </footer>
+</body>
+</html>
