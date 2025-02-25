@@ -1,14 +1,19 @@
 from flask import Flask, url_for, render_template, request, redirect, flash
+from werkzeug.security import generate_password_hash, check_password_hash
 from markupsafe import escape
+import os
 app = Flask(__name__)
 
+# 设置密钥，否则会话和消息闪现等不可用
+# app.secret_key = 'jh6 secret key'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'jh6 secret key')
 
 
+# URL规则
 @app.route('/hello1')
 @app.route('/hello2')
 def hello():
     return '<h1>Hello World!</h1>'
-
 
 @app.route('/name/<string:name>')
 def say_name(name):
@@ -20,14 +25,15 @@ def say_name(name):
     return f'User: {escape(name)} '
 
 @app.route('/hello')
-@app.route('/hello/<name>')
 def say_hello(name=None):
     return render_template('hello.html', name=name)
 
 
-@app.route('/')
+
+# The Request Object和表单
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('login.html')
+    return render_template('index.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -37,13 +43,19 @@ def login():
         password = request.form['password']
 
         if not username or not password:
-            print("用户名或密码为空!")
-            return render_template('login.html')
+            flash('必填项输入为空.')
+            return redirect(url_for('login'))
 
-        print(f'用户名: {username}, 密码: {password}')
-        if username == 'admin' and password == '123':
+        if username == 'jh6' and validate_password(password):
+            flash('登录成功')
             return render_template('index.html', name=username)
+
+        flash('用户名或密码错误')
+        return redirect(url_for('login'))
 
     return render_template('login.html')
 
 
+def validate_password(password):
+    my_password = generate_password_hash('123')
+    return check_password_hash(my_password, password)

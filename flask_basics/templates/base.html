@@ -14,6 +14,12 @@
     {% for message in get_flashed_messages() %}
         <div class="alert">{{ message }}</div>
     {% endfor %}
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+        </ul>
+    </nav>
 
     {% block content %}{% endblock %}
 

@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h3>{{ name }} 主页</h3>
+
+{% if name %}
+<h3>{{ name }} 的主页</h3>
+{% else %}
+<h3>请登录</h3>
+{% endif %}
 
 {% endblock %}
