@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+
+        <div>
+            {{ form.file.label() }}
+            {{ form.file() }}
+            <!-- 显示文件字段的错误信息 -->
+            {% if form.file.errors %}
+                <div>
+                    {% for error in form.file.errors %}
+                        <small>{{ error }}</small><br>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        {{ form.submit() }}
+    </form>
+
+{% endblock %}
