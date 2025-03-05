@@ -41,6 +41,14 @@ def index():
     return render_template('index.html')
 
 
+@app.route("/me")
+def me_api():
+    return {
+        "username": 'jh6',
+        "age":  0
+    }
+
+
 # ## The Request Object和简易表单登录
 # @app.route('/login', methods=['GET', 'POST'])
 # def login():
@@ -225,4 +233,134 @@ def show_error():
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template('errors/404.html'), 404
+
+
+"""
+日志
+"""
+import logging
+from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
+
+
+# # 配置基础日志
+# logging.basicConfig(
+#     level=logging.DEBUG,  # 设置日志级别（DEBUG/INFO/WARNING/ERROR/CRITICAL）
+#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+#     handlers=[
+#         logging.FileHandler('logs/app.log'),  # 输出到文件
+#         logging.StreamHandler()          # 输出到控制台
+#     ]
+# )
+#
+# # 按文件大小轮转（每个文件最大 1MB，保留 3 个备份）
+# size_handler = RotatingFileHandler(
+#     'app.log',
+#     maxBytes=1024 * 1024,
+#     backupCount=3,
+#     encoding='utf-8'
+# )
+#
+# # 按时间轮转（每天轮转一次，保留 7 天日志）
+# time_handler = TimedRotatingFileHandler(
+#     'app.log',
+#     when='D',
+#     interval=1,
+#     backupCount=7,
+#     encoding='utf-8'
+# )
+#
+# app.logger.addHandler(size_handler)
+# app.logger.setLevel(logging.INFO)
+
+
+# 文件处理器（按大小轮转）
+file_handler = RotatingFileHandler(
+    'logs/app.log',
+    maxBytes=1024 * 1024,
+    backupCount=5,
+    encoding='utf-8'
+)
+file_handler.setFormatter(logging.Formatter(
+    '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+))
+file_handler.setLevel(logging.INFO)
+
+# 控制台处理器
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+
+# 添加处理器
+app.logger.addHandler(file_handler)
+app.logger.addHandler(console_handler)
+app.logger.setLevel(logging.INFO)
+
+@app.route('/logs')
+def logs():
+    app.logger.info('test!')
+    return "log log"
+
+@app.route('/error1')
+def trigger_error():
+    try:
+        1 / 0
+    except Exception as e:
+        app.logger.exception('发生除零错误')  # 自动记录堆栈信息
+    return "触发错误", 500
+
+
+"""
+session
+"""
+from flask import session
+@app.route('/set_session')
+def set_session():
+    # session.permanent = True  # 启用持久化Session
+    session['username'] = 'john'
+    return 'Session 已设置'
+
+@app.route('/get_session')
+def get_session():
+    username = session.get('username')
+    if username:
+        return f'读取到的 username 为: {username}'
+    else:
+        return '未找到 username 信息'
+
+@app.route('/delete_session')
+def delete_session():
+    session.pop('username', None)
+    return 'Session 中的 username 已删除'
+
+@app.route('/clear_session')
+def clear_session():
+    session.clear()
+    return 'Session 已清空'
+
+# 自定义Session存储
+# from flask_session import Session
+# app = Flask(__name__)
+# app.secret_key = 'your-secret-key'
+# app.config['SESSION_TYPE'] = 'redis'  # 使用 Redis 存储
+# app.config['SESSION_PERMANENT'] = True
+# app.config['SESSION_USE_SIGNER'] = True  # 签名 Cookie
+# app.config['SESSION_REDIS'] = 'redis://localhost:6379/0'
+# Session(app)
+
+"""
+蓝图
+"""
+from blueprints.auth import auth_bp
+from blueprints.blog import blog_bp
+
+# 注册蓝图
+app.register_blueprint(auth_bp)
+app.register_blueprint(blog_bp)
+
+
+
+"""
+SQLAlchemy
+"""
+
+
 
