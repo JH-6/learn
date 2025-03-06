@@ -1,4 +1,6 @@
+from dominate.svg import title
 from flask import Flask, url_for, render_template, request, redirect, flash
+from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from markupsafe import escape
 import os
@@ -361,6 +363,86 @@ app.register_blueprint(blog_bp)
 """
 SQLAlchemy
 """
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
+from settings import config
+from models import db, User, Article
+from flask_migrate import Migrate
+
+# # 设置连接数据库的信息
+# HOSTNAME='127.0.0.1'
+# PORT=3306
+# USERNAME='root'
+# PASSWORD='123456'
+# DATABASE='mytest'
+#
+# # 设置连接数据库的URL
+# app.config['SQLALCHEMY_DATABASE_URI']=f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOSTNAME}:{PORT}/{DATABASE}?charset=utf8mb4'
+
+# db = SQLAlchemy(app)
+#
+# with app.app_context():
+#     # with db.engine.connect() as conn:
+#     #     result=conn.execute(text("select 1"))
+#     #     print(result.fetchone())
+#     pass
+
+config_name = os.getenv('FLASK_CONFIG', 'development')
+app.config.from_object(config[config_name])
 
 
+db.init_app(app)
+
+migrate = Migrate(app, db)
+
+
+@app.route('/user/add')
+def add_user():
+    user = User(username='jh6', password='123456')
+    db.session.add(user)
+    db.session.commit()
+    return '添加用户成功'
+
+@app.route('/user/query')
+def query_user():
+    user = User.query.filter_by(username='jh6').first()
+    if user:
+        print(f'{user.id}: {user.username}')
+
+    users = User.query.all()
+    for user in users:
+        print(f'{user.id}: {user.username}')
+    return '查询成功'
+
+
+@app.route('/user/update')
+def update_user():
+    user = User.query.get(1)
+    user.username = 'jh66666'
+    db.session.commit()
+    return '修改用户成功'
+
+@app.route('/user/delete')
+def delete_user():
+    user = User.query.get(1)
+    db.session.delete(user)
+    db.session.commit()
+    return '删除用户成功'
+
+
+@app.route('/article/add')
+def add_article():
+    article = Article(title="flask学习", content="略...")
+    article.author = User.query.get(1)
+
+    db.session.add(article)
+    db.session.commit()
+    return "添加文章成功"
+
+
+
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
